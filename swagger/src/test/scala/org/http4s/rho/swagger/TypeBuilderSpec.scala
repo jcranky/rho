@@ -3,14 +3,14 @@ package org.http4s.rho.swagger
 import java.sql.Timestamp
 import java.util.Date
 
+import scala.reflect.runtime.universe.{TypeTag, typeOf, typeTag}
+
 import cats.effect.IO
 import cats.syntax.all._
 import fs2.Stream
 import org.http4s.rho.swagger.models.AbstractProperty
 import org.specs2.execute.Result
 import org.specs2.mutable.Specification
-
-import scala.reflect.runtime.universe.{TypeTag, typeOf, typeTag}
 
 package object model {
   case class Foo(a: Int, b: String)
@@ -19,7 +19,7 @@ package object model {
   case class FooDefault(a: Int = 0)
   case class FooGeneric[+A](a: A)
   type Foos = Seq[Foo]
-  case class FooComposite(single: Foo, many: Seq[Foo])
+  case class FooComposite(single: Foo, many: Foos)
   case class FooCompositeWithAlias(single: Bar, many: Seq[Bar], manyAlias: Foos)
   case class FooWithListOfLists(values: Seq[Seq[Int]])
   case class FooWithList(l: List[Int])
