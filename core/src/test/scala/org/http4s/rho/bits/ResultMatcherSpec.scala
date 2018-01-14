@@ -6,7 +6,7 @@ import cats.Applicative
 import cats.effect.IO
 import fs2.Chunk
 import org.http4s.rho.io._
-import org.http4s.{Status => HStatus}
+import org.http4s.{Status => S}
 import org.specs2.mutable.Specification
 import shapeless.HList
 
@@ -33,7 +33,7 @@ class ResultMatcherSpec extends Specification {
         PUT / "foo" |>> { () => Ok("updated").unsafeRunSync() }
       }
 
-      srvc.statuses.map(_._1) should_== Set(Ok)
+      srvc.statuses.map(_._1) should_== Set(S.Ok)
     }
 
     "Match two results with different status with different result type" in {
@@ -47,9 +47,9 @@ class ResultMatcherSpec extends Specification {
         }
       }
 
-      srvc.statuses.map(_._1) should_== Set(NotFound, Ok)
-      srvc.statuses.collect{ case (HStatus.NotFound, t) => t }.head =:= weakTypeOf[String] must_== true
-      srvc.statuses.collect{ case (HStatus.Ok, t) => t }.head =:= weakTypeOf[Array[Byte]] must_== true
+      srvc.statuses.map(_._1) should_== Set(S.NotFound, S.Ok)
+      srvc.statuses.collect{ case (S.NotFound, t) => t }.head =:= weakTypeOf[String] must_== true
+      srvc.statuses.collect{ case (S.Ok, t) => t }.head =:= weakTypeOf[Array[Byte]] must_== true
     }
 
     "Match two results with same stat different result type" in {
@@ -63,7 +63,7 @@ class ResultMatcherSpec extends Specification {
         }
       }
 
-      srvc.statuses.map(_._1) should_== Set(Ok)
+      srvc.statuses.map(_._1) should_== Set(S.Ok)
     }
 
     "Match an empty result type" in {
@@ -71,7 +71,7 @@ class ResultMatcherSpec extends Specification {
         PUT / "foo" |>> { () => NoContent.apply }
       }
 
-      srvc.statuses.map(_._1) should_== Set(NoContent)
+      srvc.statuses.map(_._1) should_== Set(S.NoContent)
       srvc.statuses.head._2 =:= weakTypeOf[org.http4s.rho.bits.ResponseGenerator.EmptyRe]
     }
 
@@ -87,7 +87,7 @@ class ResultMatcherSpec extends Specification {
         }
       }
 
-      srvc.statuses.map(_._1) should_== Set(NotFound, Ok, Accepted)
+      srvc.statuses.map(_._1) should_== Set(S.NotFound, S.Ok, S.Accepted)
     }
 
     "Match four results with different status but same result type" in {
@@ -103,7 +103,7 @@ class ResultMatcherSpec extends Specification {
         }
       }
 
-      srvc.statuses.map(_._1) should_== Set(NotFound, Ok, Accepted, Created)
+      srvc.statuses.map(_._1) should_== Set(S.NotFound, S.Ok, S.Accepted, S.Created)
     }
 
     "Match results with locally defined types" in {
@@ -124,11 +124,11 @@ class ResultMatcherSpec extends Specification {
         }
       }
 
-      srvc.statuses.map(_._1) should_== Set(Ok, NotFound)
+      srvc.statuses.map(_._1) should_== Set(S.Ok, S.NotFound)
 
       // the type equality for locally defined types is a bit "murkey" so we use the String name
-      srvc.statuses.collect{ case (HStatus.Ok, t) => t }.head.toString must_== "ModelA"
-      srvc.statuses.collect{ case (HStatus.NotFound, t) => t }.head.toString must_== "ModelB"
+      srvc.statuses.collect{ case (S.Ok, t) => t }.head.toString must_== "ModelA"
+      srvc.statuses.collect{ case (S.NotFound, t) => t }.head.toString must_== "ModelB"
     }
 
     "Match complex models as well as simple ones" in {
@@ -141,9 +141,9 @@ class ResultMatcherSpec extends Specification {
         }
       }
 
-      srvc.statuses.map(_._1) should_== Set(Ok, NotFound)
-      srvc.statuses.collect{ case (HStatus.Ok, t) => t }.head =:= weakTypeOf[FooA] must_== true
-      srvc.statuses.collect{ case (HStatus.NotFound, t) => t }.head =:= weakTypeOf[FooB] must_== true
+      srvc.statuses.map(_._1) should_== Set(S.Ok, S.NotFound)
+      srvc.statuses.collect{ case (S.Ok, t) => t }.head =:= weakTypeOf[FooA] must_== true
+      srvc.statuses.collect{ case (S.NotFound, t) => t }.head =:= weakTypeOf[FooB] must_== true
     }
   }
 }
